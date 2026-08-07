@@ -163,7 +163,34 @@
 
     <!-- step 1: pay -->
     <p style="font-weight:700;font-size:15px;margin:14px 0 4px;"><span class="step-num">1</span>Pay <span id="payAmt">₹0</span></p>
-    <a class="btn block" id="payBtn" href="#">Pay now in UPI app</a>
+    <div class="payment-buttons">
+
+<a id="gpayBtn" class="pay-btn gpay" href="#">
+<img src="https://img.icons8.com/color/48/google-pay.png">
+<span>Google Pay</span>
+</a>
+
+<a id="phonepeBtn" class="pay-btn phonepe" href="#">
+<img src="https://img.icons8.com/color/48/phone-pe.png">
+<span>PhonePe</span>
+</a>
+
+<a id="paytmBtn" class="pay-btn paytm" href="#">
+<img src="https://img.icons8.com/color/48/paytm.png">
+<span>Paytm</span>
+</a>
+
+<a id="bhimBtn" class="pay-btn bhim" href="#">
+<img src="https://img.icons8.com/color/48/bhim.png">
+<span>BHIM</span>
+</a>
+
+<a id="credBtn" class="pay-btn cred" href="#">
+<img src="https://img.icons8.com/ios-filled/50/ffffff/credit-card.png">
+<span>CRED</span>
+</a>
+
+</div>
     <div class="qrwrap">
       <div id="qrcode"></div>
       <div class="hint">…or scan this with any UPI app (GPay / PhonePe / Paytm)</div>
