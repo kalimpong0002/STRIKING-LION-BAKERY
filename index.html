@@ -395,6 +395,18 @@ const openUPI = (e) => {
     window.location.assign(upi);
 
     return false;
+const openUPI = () => {
+    const isiPhone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isiPhone) {
+        // iPhone पर QR दिखाएँ
+        document.querySelector(".qrwrap").style.display = "block";
+        alert("📱 iPhone detected.\n\nPlease scan the QR Code using Google Pay, PhonePe, Paytm or any UPI App.");
+        return;
+    }
+
+    // Android
+    window.location.href = upi;
 };
 
 document.getElementById("gpayBtn").onclick = openUPI;
@@ -402,17 +414,6 @@ document.getElementById("phonepeBtn").onclick = openUPI;
 document.getElementById("paytmBtn").onclick = openUPI;
 document.getElementById("bhimBtn").onclick = openUPI;
 document.getElementById("credBtn").onclick = openUPI;
-
-  // QR (fallback path for scanning from another device)
-  const box = document.getElementById("qrcode");
-  box.innerHTML = "";
-  try { new QRCode(box, { text: upi, width:180, height:180, correctLevel: QRCode.CorrectLevel.M }); }
-  catch(e){ box.innerHTML = '<div class="hint">Use the green "Pay now" button above.</div>'; }
-
-  // WhatsApp order message → goes to THIS shop's number
-  _order = { orderId, items, total };
-  refreshWa();
-  document.getElementById("custName").oninput =
   document.getElementById("custAddr").oninput = refreshWa;
 
   document.getElementById("overlay").classList.add("open");
