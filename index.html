@@ -313,9 +313,11 @@ function openCheckout(){
   document.getElementById("payAmt").textContent = rupee(total);
 
   // UPI deep link — exact amount pre-filled, paid straight to the shop's VPA
-  const note = "Order " + orderId + " " + currentShop.payee;
-  const upi = "upi://pay?pa="+enc(currentShop.vpa)+"&pn="+enc(currentShop.payee)+
-              "&am="+total.toFixed(2)+"&cu=INR&tn="+enc(note);
+  const upi =
+"upi://pay?pa="+enc(currentShop.vpa)+
+"&pn="+enc(currentShop.payee)+
+"&am="+total.toFixed(2)+
+"&cu=INR";
   document.getElementById("payBtn").href = upi;
 
   // QR (fallback path for scanning from another device)
