@@ -388,25 +388,23 @@ function openCheckout(){
 "&pn="+enc(currentShop.payee)+
 "&am="+total.toFixed(2)+
 "&cu=INR";
-const openUPI = (e) => {
-    if (e) e.preventDefault();
-
-    // iPhone / Safari
-    window.location.assign(upi);
-
-    return false;
 const openUPI = () => {
     const isiPhone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     if (isiPhone) {
-        // iPhone पर QR दिखाएँ
         document.querySelector(".qrwrap").style.display = "block";
         alert("📱 iPhone detected.\n\nPlease scan the QR Code using Google Pay, PhonePe, Paytm or any UPI App.");
         return;
     }
 
-    // Android
     window.location.href = upi;
+};
+
+document.getElementById("gpayBtn").onclick = openUPI;
+document.getElementById("phonepeBtn").onclick = openUPI;
+document.getElementById("paytmBtn").onclick = openUPI;
+document.getElementById("bhimBtn").onclick = openUPI;
+document.getElementById("credBtn").onclick = openUPI;
 };
 
 document.getElementById("gpayBtn").onclick = openUPI;
