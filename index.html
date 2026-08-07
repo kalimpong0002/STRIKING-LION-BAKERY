@@ -142,8 +142,8 @@ color:#fff;
 }
 
 .pay-btn img{
-width:28px;
-height:28px;
+width:38px;
+height:38px;
 }
 
 .gpay{background:#4285F4;}
@@ -153,6 +153,21 @@ height:28px;
 .cred{
 background:#111;
 grid-column:1/3;
+}
+ .pay-btn{
+transition:0.3s;
+}
+
+.pay-btn:hover{
+transform:translateY(-3px);
+box-shadow:0 8px 20px rgba(0,0,0,.20);
+.pay-btn{
+transition:0.3s;
+}
+
+.pay-btn:hover{
+transform:translateY(-3px);
+box-shadow:0 8px 20px rgba(0,0,0,.20);
 }
 </style>
 </head>
@@ -195,7 +210,10 @@ grid-column:1/3;
 
     <!-- step 1: pay -->
     <p style="font-weight:700;font-size:15px;margin:14px 0 4px;"><span class="step-num">1</span>Pay <span id="payAmt">₹0</span></p>
-    <div class="payment-buttons">
+   <h3 style="text-align:center;margin:15px 0;">
+💳 Select Payment App
+</h3> 
+   <div class="payment-buttons">
 
 <a id="gpayBtn" class="pay-btn gpay" href="#">
 <img src="https://img.icons8.com/color/48/google-pay.png">
