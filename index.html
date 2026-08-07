@@ -215,27 +215,27 @@ box-shadow:0 8px 20px rgba(0,0,0,.20);
 </h3> 
    <div class="payment-buttons">
 
-<a id="gpayBtn" class="pay-btn gpay" href="#">
+<a id="gpayBtn" class="pay-btn gpay" href="javascript:void(0)">
 <img src="https://img.icons8.com/color/48/google-pay.png">
 <span>Google Pay</span>
 </a>
 
-<a id="phonepeBtn" class="pay-btn phonepe" href="#">
+<a id="phonepeBtn" class="pay-btn phonepe" href="javascript:void(0)">
 <img src="https://img.icons8.com/color/48/phone-pe.png">
 <span>PhonePe</span>
 </a>
 
-<a id="paytmBtn" class="pay-btn paytm" href="#">
+<a id="paytmBtn" class="pay-btn paytm" href="javascript:void(0)">
 <img src="https://img.icons8.com/color/48/paytm.png">
 <span>Paytm</span>
 </a>
 
-<a id="bhimBtn" class="pay-btn bhim" href="#">
+<a id="bhimBtn" class="pay-btn bhim" href="javascript:void(0)">
 <img src="https://img.icons8.com/color/48/bhim.png">
 <span>BHIM</span>
 </a>
 
-<a id="credBtn" class="pay-btn cred" href="#">
+<a id="credBtn" class="pay-btn cred" href="javascript:void(0)">
 <img src="https://img.icons8.com/ios-filled/50/ffffff/credit-card.png">
 <span>CRED</span>
 </a>
@@ -395,11 +395,25 @@ function openCheckout(){
 "&pn="+enc(currentShop.payee)+
 "&am="+total.toFixed(2)+
 "&cu=INR";
-  document.getElementById("gpayBtn").href = upi;
-document.getElementById("phonepeBtn").href = upi;
-document.getElementById("paytmBtn").href = upi;
-document.getElementById("bhimBtn").href = upi;
-document.getElementById("credBtn").href = upi;
+document.getElementById("gpayBtn").onclick = () => {
+    window.location.href = upi;
+};
+
+document.getElementById("phonepeBtn").onclick = () => {
+    window.location.href = upi;
+};
+
+document.getElementById("paytmBtn").onclick = () => {
+    window.location.href = upi;
+};
+
+document.getElementById("bhimBtn").onclick = () => {
+    window.location.href = upi;
+};
+
+document.getElementById("credBtn").onclick = () => {
+    window.location.href = upi;
+};
 
   // QR (fallback path for scanning from another device)
   const box = document.getElementById("qrcode");
