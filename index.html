@@ -161,13 +161,6 @@ transition:0.3s;
 .pay-btn:hover{
 transform:translateY(-3px);
 box-shadow:0 8px 20px rgba(0,0,0,.20);
-.pay-btn{
-transition:0.3s;
-}
-
-.pay-btn:hover{
-transform:translateY(-3px);
-box-shadow:0 8px 20px rgba(0,0,0,.20);
 }
 </style>
 </head>
@@ -395,25 +388,20 @@ function openCheckout(){
 "&pn="+enc(currentShop.payee)+
 "&am="+total.toFixed(2)+
 "&cu=INR";
-document.getElementById("gpayBtn").onclick = () => {
-    window.location.href = upi;
+const openUPI = (e) => {
+    if (e) e.preventDefault();
+
+    // iPhone / Safari
+    window.location.assign(upi);
+
+    return false;
 };
 
-document.getElementById("phonepeBtn").onclick = () => {
-    window.location.href = upi;
-};
-
-document.getElementById("paytmBtn").onclick = () => {
-    window.location.href = upi;
-};
-
-document.getElementById("bhimBtn").onclick = () => {
-    window.location.href = upi;
-};
-
-document.getElementById("credBtn").onclick = () => {
-    window.location.href = upi;
-};
+document.getElementById("gpayBtn").onclick = openUPI;
+document.getElementById("phonepeBtn").onclick = openUPI;
+document.getElementById("paytmBtn").onclick = openUPI;
+document.getElementById("bhimBtn").onclick = openUPI;
+document.getElementById("credBtn").onclick = openUPI;
 
   // QR (fallback path for scanning from another device)
   const box = document.getElementById("qrcode");
