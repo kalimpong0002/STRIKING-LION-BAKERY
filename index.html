@@ -190,6 +190,12 @@ grid-column:1/3;
     <label for="custAddr">Delivery address (flat / block / landmark)</label>
     <textarea id="custAddr" placeholder="e.g. Flat 204, B-Block, near water tank"></textarea>
 
+    <label for="payVpa">Merchant UPI ID</label>
+    <input id="payVpa" placeholder="e.g. yourname@okhdfcbank" autocomplete="off">
+    <label for="payeeName">Receiver name shown in the app</label>
+    <input id="payeeName" placeholder="e.g. Your Shop Name" autocomplete="off">
+    <div class="hint" id="upiStatus">Use a UPI ID linked to a real bank account. If Google Pay or PhonePe show “receiver's bank does not allow payments”, the UPI ID is not active or not linked correctly.</div>
+
     <button class="btn ghost block" id="locBtn" style="margin-top:10px;" onclick="getLoc()">📍 Add my location pin (GPS)</button>
     <div class="hint" id="locStatus">Optional but helps the rider find you. The pin travels inside the order.</div>
 
@@ -256,9 +262,9 @@ grid-column:1/3;
 const CONFIG = {
   station: "Kalimpong Military Station",
   shops: [
-    { id:"bakery", name:"🍞 Bakery", vpa:"strikinglionbakeryshop@sbi", payee:"STRIKING LION BAKERY SHOP ", wa:"918945933251",
+    { id:"bakery", name:"🍞 Bakery", vpa:"strikinglionbakeryshop@sbi", payee:"STRIKING LION BAKERY SHOP FUND ACCOUNT 527 ASC BN", wa:"918945933251",
       items:[
-        ["Mawa Cake",10], ["Plum Cake",198], ["Tea Cake",150], ["Fruit Cake",90],
+        ["Mawa Cake",1], ["Plum Cake",198], ["Tea Cake",150], ["Fruit Cake",90],
         ["Sesame Cookies",66], ["Jeera Cookies",66], ["French Butter Cookies",80],
         ["Ragi Cookies",75], ["Choco Butter Cookies",80], ["Coconut Cookies",66], ["Salted Cookies",66],
         ["Blueberry Pastry",25], ["Black Forest Pastry",28], ["Pineapple Pastry",18], ["Orange Pastry",18], ["Butterscotch Pastry",18], ["Mango Pastry",18], ["Vanilla Pastry",18], ["Strawberry Pastry",18], ["Lamington Pastry",18], ["Chocolate Pastry",18],
@@ -364,10 +370,20 @@ const UPI_APPS = {
   cred:    { android:"credpay://upi/pay?", ios:"credpay://upi/pay?", fallback:"upi://pay?" }
 };
 
+function getConfiguredVpa(){
+  const v = document.getElementById("payVpa").value.trim();
+  return v || currentShop.vpa;
+}
+
+function getConfiguredPayee(){
+  const v = document.getElementById("payeeName").value.trim();
+  return v || currentShop.payee;
+}
+
 function buildUpiQuery(total, orderId){
-  const pn = currentShop.payee.slice(0, 50);
+  const pn = getConfiguredPayee().slice(0, 50);
   const tr = orderId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 35);
-  return "pa="+enc(currentShop.vpa)+
+  return "pa="+enc(getConfiguredVpa())+
     "&pn="+enc(pn)+
     "&am="+total.toFixed(2)+
     "&cu=INR"+
@@ -409,10 +425,13 @@ function openCheckout(){
     '<div class="line"><span>'+c.qty+'× '+c.name+'</span><span>'+rupee(c.sub)+'</span></div>'
   ).join("") + '<div class="line total"><span>Total</span><span>'+rupee(total)+'</span></div>';
 
-  // restore saved name/address/location
+  // restore saved name/address/location and payment receiver fields
   document.getElementById("custName").value = localStorage.getItem("sd_name") || "";
   document.getElementById("custAddr").value = localStorage.getItem("sd_addr") || "";
+  document.getElementById("payVpa").value = localStorage.getItem("sd_vpa") || currentShop.vpa;
+  document.getElementById("payeeName").value = localStorage.getItem("sd_payee") || currentShop.payee;
   restoreLocUI();
+  refreshPayLinks();
 
   const orderId = buildOrderId();
   document.getElementById("payAmt").textContent = rupee(total);
@@ -433,11 +452,35 @@ function openCheckout(){
   refreshWa();
   document.getElementById("custName").oninput =
   document.getElementById("custAddr").oninput = refreshWa;
+  document.getElementById("payVpa").oninput = function(){
+    localStorage.setItem("sd_vpa", this.value.trim());
+    refreshPayLinks();
+  };
+  document.getElementById("payeeName").oninput = function(){
+    localStorage.setItem("sd_payee", this.value.trim());
+    refreshPayLinks();
+  };
 
   document.getElementById("overlay").classList.add("open");
 }
 
 let _order = null;  // current checkout context, used by refreshWa + getLoc
+
+function refreshPayLinks(){
+  if (!_order) return;
+  const { orderId, total } = _order;
+  wirePayButtons(total, orderId);
+  const vpa = document.getElementById("payVpa").value.trim();
+  const status = document.getElementById("upiStatus");
+  if (!vpa){
+    status.textContent = "Enter a valid UPI ID like yourname@bankname. If Google Pay or PhonePe show the bank error, the UPI ID is not active or linked correctly.";
+  } else if (!/^[^@\s]+@[^@\s]+$/.test(vpa)){
+    status.textContent = "That does not look like a valid UPI ID. Use the format name@bankname.";
+  } else {
+    status.textContent = "This UPI ID will be used for the payment link. If Google Pay or PhonePe show the bank error, the receiver UPI ID itself is not active or linked correctly.";
+  }
+  refreshWa();
+}
 
 function refreshWa(){
   if (!_order) return;
