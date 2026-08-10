@@ -154,21 +154,8 @@ height:38px;
 background:#111;
 grid-column:1/3;
 }
- .pay-btn{
-transition:0.3s;
-}
-
-.pay-btn:hover{
-transform:translateY(-3px);
-box-shadow:0 8px 20px rgba(0,0,0,.20);
-.pay-btn{
-transition:0.3s;
-}
-
-.pay-btn:hover{
-transform:translateY(-3px);
-box-shadow:0 8px 20px rgba(0,0,0,.20);
-}
+.pay-btn{transition:0.3s;}
+.pay-btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.20);}
 </style>
 </head>
 <body>
@@ -215,27 +202,27 @@ box-shadow:0 8px 20px rgba(0,0,0,.20);
 </h3> 
    <div class="payment-buttons">
 
-<a id="gpayBtn" class="pay-btn gpay" href="javascript:void(0)">
-<img src="https://img.icons8.com/color/48/google-pay.png">
+<a id="gpayBtn" class="pay-btn gpay" href="#">
+<img src="https://img.icons8.com/color/48/google-pay.png" alt="">
 <span>Google Pay</span>
 </a>
 
-<a id="phonepeBtn" class="pay-btn phonepe" href="javascript:void(0)">
-<img src="https://img.icons8.com/color/48/phone-pe.png">
+<a id="phonepeBtn" class="pay-btn phonepe" href="#">
+<img src="https://img.icons8.com/color/48/phone-pe.png" alt="">
 <span>PhonePe</span>
 </a>
 
-<a id="paytmBtn" class="pay-btn paytm" href="javascript:void(0)">
-<img src="https://img.icons8.com/color/48/paytm.png">
+<a id="paytmBtn" class="pay-btn paytm" href="#">
+<img src="https://img.icons8.com/color/48/paytm.png" alt="">
 <span>Paytm</span>
 </a>
 
-<a id="bhimBtn" class="pay-btn bhim" href="javascript:void(0)">
-<img src="https://img.icons8.com/color/48/bhim.png">
+<a id="bhimBtn" class="pay-btn bhim" href="#">
+<img src="https://img.icons8.com/color/48/bhim.png" alt="">
 <span>BHIM</span>
 </a>
 
-<a id="credBtn" class="pay-btn cred" href="javascript:void(0)">
+<a id="credBtn" class="pay-btn cred" href="#">
 <img src="https://img.icons8.com/ios-filled/50/ffffff/credit-card.png">
 <span>CRED</span>
 </a>
@@ -363,6 +350,47 @@ function renderCart(){
 }
 
 /* ----- checkout sheet ----- */
+const UA = navigator.userAgent || "";
+const IS_ANDROID = /Android/i.test(UA);
+const IS_IOS = /iPhone|iPad|iPod/i.test(UA);
+
+/* Per-app UPI links. Using the official app schemes is more reliable than
+   a generic intent URL for Google Pay and PhonePe on mobile browsers. */
+const UPI_APPS = {
+  gpay:    { android:"tez://upi/pay?", ios:"tez://upi/pay?", fallback:"upi://pay?" },
+  phonepe: { android:"phonepe://pay?", ios:"phonepe://pay?", fallback:"upi://pay?" },
+  paytm:   { android:"paytmmp://pay?", ios:"paytmmp://pay?", fallback:"upi://pay?" },
+  bhim:    { android:"bhim://pay?",    ios:"bhim://pay?",    fallback:"upi://pay?" },
+  cred:    { android:"credpay://upi/pay?", ios:"credpay://upi/pay?", fallback:"upi://pay?" }
+};
+
+function buildUpiQuery(total, orderId){
+  const pn = currentShop.payee.slice(0, 50);
+  const tr = orderId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 35);
+  return "pa="+enc(currentShop.vpa)+
+    "&pn="+enc(pn)+
+    "&am="+total.toFixed(2)+
+    "&cu=INR"+
+    "&tn="+enc("Order "+orderId)+
+    "&tr="+enc(tr);
+}
+
+function upiPayUrl(app, query){
+  const cfg = UPI_APPS[app];
+  const scheme = (IS_ANDROID ? cfg.android : IS_IOS ? cfg.ios : cfg.fallback) || cfg.fallback || "upi://pay?";
+  return scheme + query;
+}
+
+function wirePayButtons(total, orderId){
+  const query = buildUpiQuery(total, orderId);
+  Object.keys(UPI_APPS).forEach(app => {
+    const el = document.getElementById(app+"Btn");
+    if (!el) return;
+    el.href = upiPayUrl(app, query);
+    el.onclick = null;
+  });
+}
+
 function buildOrderId(){
   const d = new Date();
   const p = n => String(n).padStart(2,"0");
@@ -389,33 +417,12 @@ function openCheckout(){
   const orderId = buildOrderId();
   document.getElementById("payAmt").textContent = rupee(total);
 
-  // UPI deep link — exact amount pre-filled, paid straight to the shop's VPA
-  const upi =
-"upi://pay?pa="+enc(currentShop.vpa)+
-"&pn="+enc(currentShop.payee)+
-"&am="+total.toFixed(2)+
-"&cu=INR";
-document.getElementById("gpayBtn").onclick = () => {
-    window.location.href = upi;
-};
+  // UPI deep links — set real hrefs so mobile browsers allow opening GPay / PhonePe
+  const query = buildUpiQuery(total, orderId);
+  const upi = "upi://pay?"+query;
+  wirePayButtons(total, orderId);
 
-document.getElementById("phonepeBtn").onclick = () => {
-    window.location.href = upi;
-};
-
-document.getElementById("paytmBtn").onclick = () => {
-    window.location.href = upi;
-};
-
-document.getElementById("bhimBtn").onclick = () => {
-    window.location.href = upi;
-};
-
-document.getElementById("credBtn").onclick = () => {
-    window.location.href = upi;
-};
-
-  // QR (fallback path for scanning from another device)
+  // QR (fallback path for scanning from another device / desktop)
   const box = document.getElementById("qrcode");
   box.innerHTML = "";
   try { new QRCode(box, { text: upi, width:180, height:180, correctLevel: QRCode.CorrectLevel.M }); }
