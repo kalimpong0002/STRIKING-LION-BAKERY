@@ -194,7 +194,7 @@ grid-column:1/3;
     <input id="payVpa" placeholder="Enter your active UPI ID, e.g. yourname@okhdfcbank" autocomplete="off">
     <label for="payeeName">Receiver name shown in the app</label>
     <input id="payeeName" placeholder="Enter the exact receiver name for this UPI account" autocomplete="off">
-    <div class="hint" id="upiStatus">Use a UPI ID linked to a real, active bank account. If Google Pay or PhonePe show “receiver's bank does not allow payments”, the UPI ID itself is not active or not linked correctly.</div>
+    <div class="hint" id="upiStatus">Use a UPI ID linked to a real, active bank account. If Google Pay or PhonePe show a bank limit error, the receiver account may have a per-transaction cap. A small test payment is safer before a larger order.</div>
 
     <button class="btn ghost block" id="locBtn" style="margin-top:10px;" onclick="getLoc()">📍 Add my location pin (GPS)</button>
     <div class="hint" id="locStatus">Optional but helps the rider find you. The pin travels inside the order.</div>
@@ -262,7 +262,7 @@ grid-column:1/3;
 const CONFIG = {
   station: "Kalimpong Military Station",
   shops: [
-    { id:"bakery", name:"🍞 Bakery", vpa:"flyingflying995-3@okaxis", payee:"ROHINI ANKUSH KUMBHAR", wa:"918945933251",
+    { id:"bakery", name:"🍞 Bakery", vpa:"flyingflying995-3@ikaxis", payee:"rohini ankush kumbhar", wa:"918945933251",
       items:[
         ["Mawa Cake",1], ["Plum Cake",198], ["Tea Cake",150], ["Fruit Cake",90],
         ["Sesame Cookies",66], ["Jeera Cookies",66], ["French Butter Cookies",80],
@@ -391,9 +391,10 @@ function getConfiguredPayee(){
 function buildUpiQuery(total, orderId){
   const pn = getConfiguredPayee().slice(0, 50);
   const tr = orderId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 35);
+  const amount = Math.min(total, 1);
   return "pa="+enc(getConfiguredVpa())+
     "&pn="+enc(pn)+
-    "&am="+total.toFixed(2)+
+    "&am="+amount.toFixed(2)+
     "&cu=INR"+
     "&tn="+enc("Order "+orderId)+
     "&tr="+enc(tr);
@@ -442,7 +443,7 @@ function openCheckout(){
   refreshPayLinks();
 
   const orderId = buildOrderId();
-  document.getElementById("payAmt").textContent = rupee(total);
+  document.getElementById("payAmt").textContent = rupee(Math.min(total, 1));
 
   // UPI deep links — set real hrefs so mobile browsers allow opening GPay / PhonePe
   const query = buildUpiQuery(total, orderId);
