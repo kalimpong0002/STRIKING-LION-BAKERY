@@ -191,10 +191,10 @@ grid-column:1/3;
     <textarea id="custAddr" placeholder="e.g. Flat 204, B-Block, near water tank"></textarea>
 
     <label for="payVpa">Merchant UPI ID</label>
-    <input id="payVpa" placeholder="e.g. yourname@okhdfcbank" autocomplete="off">
+    <input id="payVpa" placeholder="Enter your active UPI ID, e.g. yourname@okhdfcbank" autocomplete="off">
     <label for="payeeName">Receiver name shown in the app</label>
-    <input id="payeeName" placeholder="e.g. Your Shop Name" autocomplete="off">
-    <div class="hint" id="upiStatus">Use a UPI ID linked to a real bank account. If Google Pay or PhonePe show “receiver's bank does not allow payments”, the UPI ID is not active or not linked correctly.</div>
+    <input id="payeeName" placeholder="Enter the exact receiver name for this UPI account" autocomplete="off">
+    <div class="hint" id="upiStatus">Use a UPI ID linked to a real, active bank account. If Google Pay or PhonePe show “receiver's bank does not allow payments”, the UPI ID itself is not active or not linked correctly.</div>
 
     <button class="btn ghost block" id="locBtn" style="margin-top:10px;" onclick="getLoc()">📍 Add my location pin (GPS)</button>
     <div class="hint" id="locStatus">Optional but helps the rider find you. The pin travels inside the order.</div>
@@ -262,7 +262,7 @@ grid-column:1/3;
 const CONFIG = {
   station: "Kalimpong Military Station",
   shops: [
-    { id:"bakery", name:"🍞 Bakery", vpa:"strikinglionbakeryshop@sbi", payee:"STRIKING LION BAKERY SHOP FUND ACCOUNT 527 ASC BN", wa:"918945933251",
+    { id:"bakery", name:"🍞 Bakery", vpa:"", payee:"", wa:"918945933251",
       items:[
         ["Mawa Cake",1], ["Plum Cake",198], ["Tea Cake",150], ["Fruit Cake",90],
         ["Sesame Cookies",66], ["Jeera Cookies",66], ["French Butter Cookies",80],
@@ -283,6 +283,14 @@ let currentShop = CONFIG.shops[0];
 let cart = {}; // key `${shopId}__${index}` -> qty  (single shop enforced)
 
 document.getElementById("stationName").textContent = CONFIG.station;
+
+function initSavedPaymentDetails(){
+  const payVpa = document.getElementById("payVpa");
+  const payeeName = document.getElementById("payeeName");
+  if (!payVpa || !payeeName) return;
+  payVpa.value = localStorage.getItem("sd_vpa") || "";
+  payeeName.value = localStorage.getItem("sd_payee") || "";
+}
 
 function renderTabs(){
   const t = document.getElementById("tabs");
@@ -371,12 +379,12 @@ const UPI_APPS = {
 };
 
 function getConfiguredVpa(){
-  const v = document.getElementById("strikinglionbakeryshop@sbi").value.trim();
+  const v = document.getElementById("payVpa").value.trim();
   return v || currentShop.vpa;
 }
 
 function getConfiguredPayee(){
-  const v = document.getElementById("STRIKING LION BAKERY SHOP FUND ACCOUNT 527 ASC BN").value.trim();
+  const v = document.getElementById("payeeName").value.trim();
   return v || currentShop.payee;
 }
 
@@ -428,8 +436,8 @@ function openCheckout(){
   // restore saved name/address/location and payment receiver fields
   document.getElementById("custName").value = localStorage.getItem("sd_name") || "";
   document.getElementById("custAddr").value = localStorage.getItem("sd_addr") || "";
-  document.getElementById("payVpa").value = localStorage.getItem("sd_vpa") || currentShop.vpa;
-  document.getElementById("payeeName").value = localStorage.getItem("sd_payee") || currentShop.payee;
+  document.getElementById("payVpa").value = localStorage.getItem("sd_vpa") || currentShop.vpa || "";
+  document.getElementById("payeeName").value = localStorage.getItem("sd_payee") || currentShop.payee || "";
   restoreLocUI();
   refreshPayLinks();
 
@@ -492,9 +500,10 @@ function refreshWa(){
   const geo = getSavedGeo();
   const mapLine = geo ? "\n🗺️ Map: https://maps.google.com/?q="+geo.lat+","+geo.lng : "";
   const lines = items.map(c => c.qty+"× "+c.name+" — "+rupee(c.sub)).join("\n");
+  const payeeName = getConfiguredPayee() || currentShop.payee || "Merchant";
   const msg =
     "🛒 New Order #"+orderId+"\n"+
-    "🏪 "+currentShop.payee+"\n"+
+    "🏪 "+payeeName+"\n"+
     "————————\n"+
     lines+"\n"+
     "————————\n"+
@@ -546,6 +555,7 @@ document.getElementById("overlay").addEventListener("click", e => {
   if (e.target.id === "overlay") closeCheckout();
 });
 
+initSavedPaymentDetails();
 renderTabs(); renderItems(); renderCart();
 </script>
 </body>
